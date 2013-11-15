@@ -1,0 +1,30 @@
+{
+    "name": "eviweb/workbench",
+    "description": "Extended Laravel4 workbench command",
+    "keywords": ["extension", "laravel", "workbench", "command"],
+    "license" : "MIT",
+    "authors": [
+        {
+            "name": "Eric VILLARD",
+            "email": "dev@eviweb.fr",
+            "homepage": "https://github.com/eviweb",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.0.x",
+        "illuminate/workbench" : "4.0.x"
+    },
+    "require-dev": {
+        "mikey179/vfsStream": "dev-master",
+        "phpunit/phpunit": "dev-master",
+        "mockery/mockery": "dev-master@dev"
+    },
+    "autoload": {
+        "psr-0": {
+            "evidev": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

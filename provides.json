@@ -1,0 +1,8 @@
+{
+  "providers": [
+    "evidev\\laravel4\\extensions\\workbench\\WorkbenchServiceProvider"
+  ],
+  "aliases": [
+    
+  ]
+}
