@@ -68,6 +68,13 @@ final class Package extends \Illuminate\Workbench\Package
     public $license;
 
     /**
+     * authors information
+     *
+     * @var array
+     */
+    public $authors;
+
+    /**
      * private factory method to handle new properties
      */
     private static function newInst()
@@ -75,11 +82,12 @@ final class Package extends \Illuminate\Workbench\Package
         $args = func_get_args();
         $inst = new static($args[0], $args[1], $args[2], $args[3]);
 
-        $newProps = array_slice($args, -3);
+        $newProps = array_slice($args, -4);
         $inst->psr0 = $newProps[0];
         $inst->namespace = $newProps[1];
         $inst->license = $newProps[2];
-
+        $inst->authors = $newProps[3];
+        
         return $inst;
     }
 
@@ -94,7 +102,7 @@ final class Package extends \Illuminate\Workbench\Package
      */
     public static function emptyInst()
     {
-        return static::newInst('', '', '', '', '', '', '');
+        return static::newInst('', '', '', '', '', '', '', array());
     }
 
     /**
@@ -112,7 +120,8 @@ final class Package extends \Illuminate\Workbench\Package
             $this->email,
             $this->psr0,
             $this->namespace,
-            $this->license
+            $this->license,
+            $this->authors
         );
     }
 
@@ -131,45 +140,31 @@ final class Package extends \Illuminate\Workbench\Package
             $this->email,
             $this->psr0,
             $this->namespace,
-            $this->license
+            $this->license,
+            $this->authors
         );
     }
 
     /**
-     * author provider factory method
+     * authors provider factory method
      *
-     * @param string $author    author name
+     * author and email properties are set using name and email information
+     * of the first element of the provided array
+     *
+     * @param array $author     authors informations
      * @return Package
      */
-    public function authorProvider($author)
+    public function authorsProvider($authors)
     {
         return static::newInst(
             $this->vendor,
             $this->name,
-            $author,
-            $this->email,
+            $authors[0]['name'],
+            $authors[0]['email'],
             $this->psr0,
             $this->namespace,
-            $this->license
-        );
-    }
-
-    /**
-     * email provider factory method
-     *
-     * @param string $email     author's email
-     * @return Package
-     */
-    public function emailProvider($email)
-    {
-        return static::newInst(
-            $this->vendor,
-            $this->name,
-            $this->author,
-            $email,
-            $this->psr0,
-            $this->namespace,
-            $this->license
+            $this->license,
+            $authors
         );
     }
 
@@ -188,7 +183,8 @@ final class Package extends \Illuminate\Workbench\Package
             $this->email,
             addslashes(preg_replace('/\\+|\/+/', '\\', $psr0)),
             $this->namespace,
-            $this->license
+            $this->license,
+            $this->authors
         );
     }
 
@@ -207,7 +203,8 @@ final class Package extends \Illuminate\Workbench\Package
             $this->email,
             $this->psr0,
             preg_replace('/\\+|\/+/', '\\', $namespace),
-            $this->license
+            $this->license,
+            $this->authors
         );
     }
 
@@ -226,7 +223,8 @@ final class Package extends \Illuminate\Workbench\Package
             $this->email,
             $this->psr0,
             $this->namespace,
-            $license
+            $license,
+            $this->authors
         );
     }
     //--------------------------------------------------------------------------

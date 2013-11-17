@@ -33,6 +33,7 @@
 namespace evidev\laravel4\extensions\workbench\tests\unit;
 
 use evidev\laravel4\extensions\workbench\Package;
+use evidev\laravel4\extensions\workbench\tests\fixtures\stubs\ConfigStub;
 
 /**
  * Test class for Package
@@ -52,21 +53,28 @@ class PackageTest extends \PHPUnit_Framework_TestCase
     private $obj;
 
     /**
+     * configuration stub provider
+     *
+     * @var ConfigStub
+     */
+    private $config;
+
+    /**
      * set up test environment
      */
     public function setUp()
     {
         parent::setUp();
+        $this->config = ConfigStub::create();
         $this->obj = new \stdClass();
         $this->obj->vendor = 'Evidev';
         $this->obj->name = 'Workbench';
-        $this->obj->author = 'AUTHOR';
-        $this->obj->email = 'EMAIL';
         $this->obj->psr0 = 'new\psr0///compliant\\namespace';
         $this->obj->psr0expected = addslashes('new\psr0\compliant\namespace');
         $this->obj->namespace = 'new\long///name\\space';
         $this->obj->namespaceexpected = 'new\long\name\space';
-        $this->obj->license = 'MIT';
+        $this->obj->authors = $this->config->config()->get('workbench.composer.authors');
+        $this->obj->license = $this->config->config()->get('workbench.composer.license');
     }
 
     /**
@@ -86,9 +94,12 @@ class PackageTest extends \PHPUnit_Framework_TestCase
     {
         $props = get_object_vars($object);
         foreach ($props as $name => $value) {
-            print('<pre>'.print_r($name.' / '.(string)(integer)  in_array($name, $excludes), true).'</pre>');
             if (!in_array($name, $excludes)) {
-                $this->assertEmpty($props[$name], 'Check '.$name.' with value: '.$value.' is empty');
+                if (is_array($props[$name])) {
+                    $this->assertCount(0, $props[$name], 'Check '.$name.' with number of values: '.count($props[$name]).' is empty');
+                } elseif (is_string($props[$name])) {
+                    $this->assertEmpty($props[$name], 'Check '.$name.' with value: '.$value.' is empty');
+                }
             }
         }
     }
@@ -115,20 +126,16 @@ class PackageTest extends \PHPUnit_Framework_TestCase
         $this->checkEmptyState($inst, array('name', 'lowerName'));
     }
 
-    public function testAuthorProvider()
+    public function testAuthorsProvider()
     {
-        $given = $this->obj->author;
-        $inst = Package::emptyInst()->authorProvider($given);
-        $this->assertEquals($given, $inst->author);
-        $this->checkEmptyState($inst, array('author'));
-    }
-
-    public function testEmailProvider()
-    {
-        $given = $this->obj->email;
-        $inst = Package::emptyInst()->emailProvider($given);
-        $this->assertEquals($given, $inst->email);
-        $this->checkEmptyState($inst, array('email'));
+        $given = $this->obj->authors;
+        $inst = Package::emptyInst()->authorsProvider($given);
+        $this->assertCount(count($given), $inst->authors);
+        $this->assertEquals($given[0]['name'], $inst->authors[0]['name']);
+        $this->assertEquals($given[1]['name'], $inst->authors[1]['name']);
+        $this->checkEmptyState($inst, array('authors', 'author', 'email'));
+        $this->assertEquals($given[0]['name'], $inst->author);
+        $this->assertEquals($given[0]['email'], $inst->email);
     }
 
     public function testPsr0Provider()
@@ -160,16 +167,18 @@ class PackageTest extends \PHPUnit_Framework_TestCase
         $inst = Package::emptyInst()
             ->vendorProvider($this->obj->vendor)
             ->nameProvider($this->obj->name)
-            ->authorProvider($this->obj->author)
-            ->emailProvider($this->obj->email)
+            ->authorsProvider($this->obj->authors)
             ->psr0Provider($this->obj->psr0)
             ->namespaceProvider($this->obj->namespace)
             ->licenseProvider($this->obj->license);
         //
         $this->assertEquals($this->obj->vendor, $inst->vendor);
         $this->assertEquals($this->obj->name, $inst->name);
-        $this->assertEquals($this->obj->author, $inst->author);
-        $this->assertEquals($this->obj->email, $inst->email);
+        $this->assertCount(count($this->obj->authors), $inst->authors);
+        $this->assertEquals($this->obj->authors[0]['name'], $inst->authors[0]['name']);
+        $this->assertEquals($this->obj->authors[1]['name'], $inst->authors[1]['name']);
+        $this->assertEquals($this->obj->authors[0]['name'], $inst->author);
+        $this->assertEquals($this->obj->authors[0]['email'], $inst->email);
         $this->assertEquals($this->obj->psr0expected, $inst->psr0);
         $this->assertEquals($this->obj->namespaceexpected, $inst->namespace);
         $this->assertEquals(
