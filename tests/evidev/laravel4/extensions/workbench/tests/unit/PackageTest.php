@@ -187,4 +187,16 @@ class PackageTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($this->obj->license, $inst->license);
     }
+
+    public function testDefaultPsr0()
+    {
+        $inst = Package::emptyInst()
+            ->vendorProvider($this->obj->vendor)
+            ->nameProvider($this->obj->name);
+        
+        $this->assertEquals(
+            $this->obj->vendor.'\\\\'.$this->obj->name,
+            $inst->psr0
+        );
+    }
 }

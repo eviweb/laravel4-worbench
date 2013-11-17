@@ -84,6 +84,11 @@ final class Package extends \Illuminate\Workbench\Package
 
         $newProps = array_slice($args, -4);
         $inst->psr0 = $newProps[0];
+        if (empty($inst->psr0) &&
+            !empty($args[0]) &&
+            !empty($args[1])) {
+            $inst->psr0 = $args[0].'\\\\'.$args[1];
+        }
         $inst->namespace = $newProps[1];
         $inst->license = $newProps[2];
         $inst->authors = $newProps[3];
