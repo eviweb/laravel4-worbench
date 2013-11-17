@@ -55,10 +55,11 @@ final class Bootstrapper
         $loader = require(__DIR__.'/../vendor/autoload.php');
         foreach ($this->nspaths as $ns => $paths) {
             $loader->add($ns, $paths);
-        }        
+        }
     }
 }
 
 Bootstrapper::create()
-    ->prepareNsPaths()
-    ->run();
+    ->prepareNsPaths(
+        array('evidev' => array(__DIR__))
+    )->run();
