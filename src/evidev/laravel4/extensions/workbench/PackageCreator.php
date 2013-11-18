@@ -74,9 +74,9 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
         $vars = get_object_vars($package);
         foreach ($vars as $key => $value) {
             if (is_string($vars[$key])) {
-                $stub = str_replace('{{'.snake_case($key).'}}', addslashes($value), $stub);
+                $stub = str_replace('{{' . snake_case($key) . '}}', addslashes($value), $stub);
             } elseif (is_array($vars[$key])) {
-                $stub = str_replace('"{{'.snake_case($key).'}}"', json_encode($value), $stub);
+                $stub = str_replace('"{{' . snake_case($key) . '}}"', json_encode($value), $stub);
             }
         }
 
@@ -93,7 +93,7 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
     {
         foreach ($vars as $key => $value) {
             if (is_string($vars[$key])) {
-                $stub = str_replace('{{'.snake_case($key).'}}', $value, $stub);
+                $stub = str_replace('{{' . snake_case($key) . '}}', $value, $stub);
             }
         }
 
@@ -125,5 +125,53 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
         }
 
         return $this->files->get(__DIR__ . '/stubs/composer.json');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getProviderStub(Package $package, $plain)
+    {
+        return $this->formatPackageStub($package, $this->getProviderFile($plain, $package));
+    }
+
+    /**
+     * Load the raw service provider file.
+     *
+     * @param  bool   $plain
+     * @param  \Illuminate\Workbench\Package  $package
+     * @return string
+     */
+    protected function getProviderFile($plain, $package)
+    {
+        if (!isset($package->namespace) || empty($package->namespace)) {
+            return parent::getProviderFile($plain);
+        }
+        if ($plain) {
+            return $this->files->get(__DIR__ . '/stubs/plain.provider.stub');
+        } else {
+            return $this->files->get(__DIR__ . '/stubs/provider.stub');
+        }
+    }
+
+    /**
+     * Create the main source directory for the package.
+     *
+     * @param  \Illuminate\Workbench\Package  $package
+     * @param  string  $directory
+     * @return string
+     */
+    protected function createClassDirectory(Package $package, $directory)
+    {
+        $path = $directory . '/src/' .
+            (isset($package->namespace) && !empty($package->namespace) ?
+                preg_replace('/\/+/', '/', str_replace('\\', '/', $package->namespace) . '/') :
+                $package->vendor . '/' . $package->name);
+
+        if (!$this->files->isDirectory($path)) {
+            $this->files->makeDirectory($path, 0777, true);
+        }
+
+        return $path;
     }
 }

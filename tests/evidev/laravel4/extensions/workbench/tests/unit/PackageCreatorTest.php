@@ -129,6 +129,27 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * get composer.json files of the created packages
+     *
+     * @return array        returns the path of the composer.json file
+     */
+    private function getServiceProviderFiles()
+    {
+        return array(
+            'oldfashioned' => $this->rootdir->url().'/vendor/old-fashioned/src/'.
+                $this->oldfashioned->vendor.'/'.
+                $this->oldfashioned->name.'/'.
+                $this->oldfashioned->name.'ServiceProvider.php',
+            'newpackage' => $this->rootdir->url().'/vendor/new-package/src/'.
+                preg_replace('/\/+/', '/', str_replace('\\', '/', $this->newpackage->namespace).'/').
+                $this->newpackage->name.'ServiceProvider.php'
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    // composer.json tests
+    //--------------------------------------------------------------------------
     public function testComposerFilesExist()
     {
         $files = $this->getComposerFiles();
@@ -176,11 +197,6 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testOldFashionedServiceProviderIntegrity()
-    {
-        $this->markTestIncomplete('to implement');
-    }
-
     public function testPackageAuthors()
     {
         $files = $this->getComposerFiles();
@@ -200,8 +216,49 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('src/', $composer->autoload->{"psr-0"}->$psr0);
     }
 
+    //--------------------------------------------------------------------------
+    // service provider tests
+    //--------------------------------------------------------------------------
+    public function testServiceProviderFilesExist()
+    {
+        $files = $this->getServiceProviderFiles();
+        $this->assertFileExists($files['oldfashioned']);
+        $this->assertFileExists($files['newpackage']);
+    }
+
+    public function testOldFashionedServiceProviderIntegrity()
+    {
+        $files = $this->getServiceProviderFiles();
+        $matches = array();
+        $this->assertTrue(
+            1 === preg_match(
+                '/namespace\s+([^\s;]+)/',
+                file_get_contents($files['oldfashioned']),
+                $matches
+            )
+        );
+        $namespace = $matches[1];
+        $this->assertEquals(
+            $this->oldfashioned->vendor.'\\'.$this->oldfashioned->name,
+            $namespace
+        );
+    }
+
     public function testPackageServiceProviderNamespace()
     {
-        $this->markTestIncomplete('to implement');
+        $files = $this->getServiceProviderFiles();
+        $matches = array();
+        $this->assertTrue(
+            1 === preg_match(
+                '/namespace\s+([^\s;]+)/',
+                file_get_contents($files['newpackage']),
+                $matches
+            )
+        );
+        $namespace = $matches[1];
+        $this->assertEquals(
+            preg_replace('/\\+/', '\\', $this->newpackage->namespace),
+            $namespace
+        );
     }
 }
