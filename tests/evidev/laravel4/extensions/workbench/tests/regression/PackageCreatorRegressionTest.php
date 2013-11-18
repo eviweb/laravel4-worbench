@@ -135,4 +135,27 @@ class PackageCreatorRegressionTest extends \PHPUnit_Framework_TestCase
             'Autoload - PSR-0 value check: '
         );
     }
+
+    public function testWriteServiceProviderGuard()
+    {
+        $this->creator->writeServiceProvider(
+            $this->package,
+            $this->rootdir->url(),
+            true
+        );
+        $file = $this->rootdir->url().'/src/'.
+            $this->package->vendor.'/'.
+            $this->package->name.'/'.
+            $this->package->name.'ServiceProvider.php';
+        $this->assertFileExists($file);
+        $matches = array();
+        $this->assertTrue(
+            preg_match('/namespace\s+([^\s;]+)/', file_get_contents($file), $matches) === 1
+        );
+        $namespace = $matches[1];
+        $this->assertEquals(
+            $this->package->vendor.'\\'.$this->package->name,
+            $namespace
+        );
+    }
 }
