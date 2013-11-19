@@ -132,7 +132,7 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
      */
     protected function getProviderStub(Package $package, $plain)
     {
-        return $this->formatPackageStub($package, $this->getProviderFile($plain, $package));
+        return $this->formatPackageStub($package, $this->getProviderFileFromPackage($plain, $package));
     }
 
     /**
@@ -142,7 +142,7 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
      * @param  \Illuminate\Workbench\Package  $package
      * @return string
      */
-    protected function getProviderFile($plain, $package)
+    protected function getProviderFileFromPackage($plain, $package)
     {
         if (!isset($package->namespace) || empty($package->namespace)) {
             return parent::getProviderFile($plain);
