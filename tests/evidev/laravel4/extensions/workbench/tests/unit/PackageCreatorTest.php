@@ -35,6 +35,7 @@ namespace evidev\laravel4\extensions\workbench\tests\unit;
 use evidev\laravel4\extensions\workbench\PackageCreator;
 use evidev\laravel4\extensions\workbench\Package;
 use evidev\laravel4\extensions\workbench\tests\fixtures\stubs\ConfigStub;
+use evidev\laravel4\extensions\workbench\tests\helpers\Helper;
 use org\bovigo\vfs\vfsStream;
 use Illuminate\Filesystem\Filesystem;
 
@@ -75,6 +76,13 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
      * @var Package
      */
     private $newpackage;
+    
+    /**
+     * helper instance
+     *
+     * @var Helper
+     */
+    private $helper;
 
     /**
      * set up test environment
@@ -82,6 +90,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
+        $this->helper = Helper::create();
         $this->rootdir = vfsStream::setup('workbench');
         $this->config = ConfigStub::create();
         $this->createPackages();
@@ -160,7 +169,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
     public function testOldFashionedComposerIntegrity()
     {
         $files = $this->getComposerFiles();
-        $composer = json_decode(file_get_contents($files['oldfashioned']));
+        $composer = $this->helper->getJSON($files['oldfashioned']);
 
         // check package name
         $this->assertEquals(
@@ -200,7 +209,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
     public function testPackageAuthors()
     {
         $files = $this->getComposerFiles();
-        $composer = json_decode(file_get_contents($files['newpackage']));
+        $composer = $this->helper->getJSON($files['newpackage']);
         $authors = $this->config->config()->get('workbench.composer.authors');
         $this->assertCount(count($authors), $composer->authors);
         $this->assertEquals($authors[0]['name'], $composer->authors[0]->name);
@@ -210,7 +219,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
     public function testPackagePsr0()
     {
         $files = $this->getComposerFiles();
-        $composer = json_decode(file_get_contents($files['newpackage']));
+        $composer = $this->helper->getJSON($files['newpackage']);
         $psr0 = $this->newpackage->psr0;
         $this->assertTrue(isset($composer->autoload->{"psr-0"}->$psr0));
         $this->assertEquals('src/', $composer->autoload->{"psr-0"}->$psr0);
@@ -257,7 +266,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
         );
         $namespace = $matches[1];
         $this->assertEquals(
-            preg_replace('/\\+/', '\\', $this->newpackage->namespace),
+            preg_replace('/[\\\\]+/', '\\', $this->newpackage->namespace),
             $namespace
         );
     }

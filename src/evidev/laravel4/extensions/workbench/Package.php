@@ -186,7 +186,7 @@ final class Package extends \Illuminate\Workbench\Package
             $this->name,
             $this->author,
             $this->email,
-            addslashes(preg_replace('/\\+|\/+/', '\\', $psr0)),
+            str_replace('\\', '\\\\', preg_replace('/[\\\\]+|\/+/', '\\', $psr0)),
             $this->namespace,
             $this->license,
             $this->authors
@@ -207,7 +207,7 @@ final class Package extends \Illuminate\Workbench\Package
             $this->author,
             $this->email,
             $this->psr0,
-            preg_replace('/\\+|\/+/', '\\', $namespace),
+            preg_replace('/[\\\\]+|\/+/', '\\', $namespace),
             $this->license,
             $this->authors
         );

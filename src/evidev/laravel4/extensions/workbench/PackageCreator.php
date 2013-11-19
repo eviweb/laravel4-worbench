@@ -74,7 +74,7 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
         $vars = get_object_vars($package);
         foreach ($vars as $key => $value) {
             if (is_string($vars[$key])) {
-                $stub = str_replace('{{' . snake_case($key) . '}}', addslashes($value), $stub);
+                $stub = str_replace('{{' . snake_case($key) . '}}', $value, $stub);
             } elseif (is_array($vars[$key])) {
                 $stub = str_replace('"{{' . snake_case($key) . '}}"', json_encode($value), $stub);
             }
