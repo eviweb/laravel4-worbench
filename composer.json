@@ -21,6 +21,7 @@
         "mikey179/vfsStream": "dev-master",
         "phpunit/phpunit": "3.7.*@dev",
         "mockery/mockery": "dev-master@dev",
+        "antecedent/patchwork": "*",
         "illuminate/config": "4.0.x",
         "illuminate/events": "4.0.x",
         "illuminate/console": "4.0.x"
@@ -28,7 +29,10 @@
     "autoload": {
         "psr-0": {
             "evidev": "src/"
-        }
+        },
+        "files": [
+            "vendor/antecedent/patchwork/Patchwork.php"
+        ]
     },
     "minimum-stability": "dev"
 }
