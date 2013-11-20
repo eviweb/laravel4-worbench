@@ -62,7 +62,7 @@ class WorkbenchServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->package('eviweb/workbench');
+        $this->package('eviweb/laravel4-workbench', 'workbench');
     }
 
     /**

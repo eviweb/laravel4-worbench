@@ -1,5 +1,5 @@
 {
-    "name": "eviweb/workbench",
+    "name": "eviweb/laravel4-workbench",
     "description": "Extended Laravel4 workbench command",
     "keywords": ["extension", "laravel", "workbench", "command"],
     "license" : "MIT",
