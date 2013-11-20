@@ -104,4 +104,14 @@ class WorkbenchServiceProviderTest extends \PHPUnit_Framework_TestCase
             $this->app[$provided[1]]
         );
     }
+
+    public function testGuessPackagePath()
+    {
+        $service = new WorkbenchServiceProvider($this->app);
+        $expected = realpath(
+            str_replace(preg_replace('/[\\\\]+/', '/', __NAMESPACE__), '', __DIR__).
+            '/../src'
+        );
+        $this->assertEquals($expected, $service->guessPackagePath());
+    }
 }
