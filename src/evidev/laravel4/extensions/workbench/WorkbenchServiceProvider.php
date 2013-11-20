@@ -33,7 +33,7 @@
 namespace evidev\laravel4\extensions\workbench;
 
 use ReflectionClass;
-use Illuminate\Support\ServiceProvider;
+use evidev\illuminate\redefined\support\ServiceProvider;
 use evidev\laravel4\extensions\workbench\PackageCreator;
 use evidev\laravel4\extensions\workbench\console\WorkbenchCommand;
 
@@ -95,21 +95,5 @@ class WorkbenchServiceProvider extends ServiceProvider
     public function provides()
     {
         return array('package.creator', 'command.workbench');
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @return string
-     */
-    public function guessPackagePath()
-    {
-        $reflect = new ReflectionClass($this);
-        $chain = $this->getClassChain($reflect);
-        $class = $chain[count($chain) - 2];
-        $file = $class->getFileName();
-        $ns = $class->getNamespaceName();
-        $path = str_replace(preg_replace('/[\\\\]+/', '/', $ns), '', dirname($file));
-        return realpath($path);
     }
 }
