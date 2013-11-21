@@ -67,17 +67,26 @@ final class WorkbenchCommand extends WorkbenchMakeCommand
     protected function buildPackage()
     {
         list($vendor, $name) = $this->getPackageSegments();
-
+   
+        // get current config
         $config = $this->laravel['config']['workbench'];
+        $newconfig = isset($this->laravel['config']['workbench']['composer']);
 
+        // get config options
+        $authors = $newconfig ? $config['composer']['authors'] : array($config);
+        $license = $newconfig ? $config['composer']['license'] : '';
         $psr0 = $this->option('psr0');
-        $namespace = $this->option('ns');
+        $namespace = str_replace(
+            '\\',
+            '\\\\',
+            preg_replace('/[\\\\]+/', '\\', $this->option('ns'))
+        );
 
         return Package::emptyInst()
             ->vendorProvider($vendor)
             ->nameProvider($name)
-            ->authorsProvider($config['composer']['authors'])
-            ->licenseProvider($config['composer']['license'])
+            ->authorsProvider($authors)
+            ->licenseProvider($license)
             ->psr0Provider($psr0)
             ->namespaceProvider($namespace);
     }
