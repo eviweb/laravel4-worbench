@@ -4,7 +4,9 @@ This is an extension to the native workbench command provided by Laravel4
 ###Build Status
 **Travis CI:** [![Build Status](https://travis-ci.org/eviweb/laravel4-workbench.png?branch=master)]
 (https://travis-ci.org/eviweb/laravel4-workbench)   
-**Scrutinizer CI:**     
+**Scrutinizer CI:** [![Scrutinizer Quality Score]
+(https://scrutinizer-ci.com/g/eviweb/laravel4-workbench/badges/quality-score.png?s=20885ad142635ecdf98cefaf5cd3c00cacc4365b)]
+(https://scrutinizer-ci.com/g/eviweb/laravel4-workbench/)     
 
 How to install
 ==============
