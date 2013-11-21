@@ -18,7 +18,7 @@ Manually using Composer
 
 Using Laravel Package Installer
 -------------------------------
-*   Run `php artisan package:install eviweb/laravel4-workbench`     
+*   Run `php artisan package:install eviweb/laravel4-workbench:dev-master`     
 
 How to use
 ==========
