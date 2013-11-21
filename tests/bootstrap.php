@@ -49,6 +49,16 @@ final class Bootstrapper
         $this->nspaths = $nspaths;
         return $this;
     }
+    
+    public function loadFiles($files = array())
+    {
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
+        return $this;
+    }
 
     public function run()
     {
@@ -62,4 +72,7 @@ final class Bootstrapper
 Bootstrapper::create()
     ->prepareNsPaths(
         array('evidev' => array(__DIR__))
+    )
+    ->loadFiles(
+        array(__DIR__.'/../vendor/antecedent/patchwork/Patchwork.php')
     )->run();

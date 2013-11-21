@@ -29,10 +29,7 @@
     "autoload": {
         "psr-0": {
             "evidev": "src/"
-        },
-        "files": [
-            "vendor/antecedent/patchwork/Patchwork.php"
-        ]
+        }
     },
     "minimum-stability": "dev"
 }
