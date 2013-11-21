@@ -32,13 +32,12 @@
 
 namespace evidev\laravel4\extensions\workbench\tests\unit;
 
-use evidev\laravel4\extensions\workbench\console\WorkbenchCommand;
+use evidev\laravel4\extensions\workbench\tests\fixtures\stubs\WorkbenchCommandWrapper;
 use evidev\laravel4\extensions\workbench\PackageCreator;
 use evidev\laravel4\extensions\workbench\tests\fixtures\stubs\ConfigStub;
 use evidev\laravel4\extensions\workbench\tests\helpers\Helper;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
 use Illuminate\Filesystem\Filesystem;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Test class for WorkbenchCommand.
@@ -65,6 +64,13 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
     private $helper;
 
     /**
+     * package meta information
+     *
+     * @var array
+     */
+    private $meta;
+
+    /**
      * set up test environment
      */
     public function setUp()
@@ -72,12 +78,17 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
         $this->helper = Helper::create();
         $this->app = array(
-            'path.base' => sys_get_temp_dir().'/'.uniqid('workbench-'),
+            'path.base' => vfsStream::setup('workbench')->url(),
             'config' => array(
                 'workbench' => ConfigStub::create()->config()->get('workbench')
             )
         );
-        mkdir($this->app['path.base'], 0777);
+        $this->meta = array(
+            'vendor' => 'Vendor',
+            'name' => 'Package',
+            'package' => 'vendor/package',
+        );
+        $this->meta['namespace'] = $this->meta['vendor'].'\\\\'.$this->meta['name'];
     }
 
     /**
@@ -85,45 +96,34 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
-        (new Filesystem())->deleteDirectory($this->app['path.base'], false);
     }
     
     /**
      * get a command instance
      * 
-     * @return WorkbenchCommand
+     * @return WorkbenchCommandWrapper
      */
     private function getCommand()
     {
-        $application = new Application();
-        $command = new WorkbenchCommand(new PackageCreator(new Filesystem()));
+        $command = WorkbenchCommandWrapper::create(
+            new PackageCreator(new Filesystem)
+        );
         $command->setLaravel($this->app);
-        $application->add($command);
-        return $application->find('workbench');
+        return $command;
     }
 
-    public function testWithoutOptions()
+    public function testComposerFileWithoutOptions()
     {
-        $vendor = 'Vendor';
-        $name = 'Package';
-        $package = 'vendor/package';
-        $command = $this->getCommand();
-        $commandTester = new CommandTester($command);
-        $commandTester->execute(
-            array('command' => $command->getName(), 'package' => $package)
-        );
-        $path = $this->app['path.base'].'/workbench/'.$package;
+        $this->getCommand()->execute(array('package' => $this->meta['package']));
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
         $composerfile = $path.'/composer.json';
-        $providerfile = $path.'/src/'.$vendor.'/'.$name.'/PackageServiceProvider.php';
 
-        // check paths
-        $this->assertFileExists($path);
+        // check file
         $this->assertFileExists($composerfile);
-        $this->assertFileExists($providerfile);
 
-        // check composer authors
+        // check authors
         $composer = $this->helper->getJSON($composerfile);
-        $this->assertEquals($package, $composer->name);
+        $this->assertEquals($this->meta['package'], $composer->name);
         $this->assertCount(
             count($this->app['config']['workbench']['composer']['authors']),
             $composer->authors
@@ -134,20 +134,32 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
         );
         
         // check autoload psr-0
-        $psr0 = $vendor.'\\\\'.$name;
         $this->objectHasAttribute(
-            $psr0,
+            $this->meta['namespace'],
             $composer->autoload->{'psr-0'},
             'Autoload - PSR-0 key check: '
         );
 
         $this->assertEquals(
-            $composer->autoload->{'psr-0'}->$psr0,
+            $composer->autoload->{'psr-0'}->{$this->meta['namespace']},
             'src/',
             'Autoload - PSR-0 value check: '
         );
 
-        // check service provider namespace
+    }
+
+    public function testProviderFileWithoutOptions()
+    {
+        $this->getCommand()->execute(array('package' => $this->meta['package']));
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
+        $providerfile = $path.'/src/'.
+            $this->meta['vendor'].'/'.$this->meta['name'].'/PackageServiceProvider.php';
+
+        // check file
+        $this->assertFileExists($providerfile);
+
+
+        // check namespace
         $matches = array();
         $this->assertTrue(
             1 === preg_match(
@@ -156,53 +168,135 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
                 $matches
             )
         );
-        $namespace = $matches[1];
+        
         $this->assertEquals(
-            preg_replace('/[\\\\]+/', '\\', $psr0),
-            $namespace
+            preg_replace('/[\\\\]+/', '\\', $this->meta['namespace']),
+            $matches[1]
         );
     }
 
-    public function testWithPsr0Option()
+    public function testComposerFileWithPsr0Option()
     {
-        $vendor = 'Vendor';
-        $name = 'Package';
-        $package = 'vendor/package';
-        $command = $this->getCommand();
-        $commandTester = new CommandTester($command);
-        $commandTester->execute(
+        $this->getCommand()->execute(
             array(
-                'command' => $command->getName(),
-                'package' => $package,
-                '--psr0' => $vendor
+                'package' => $this->meta['package'],
+                '--psr0' => $this->meta['vendor']
             )
         );
-        $path = $this->app['path.base'].'/workbench/'.$package;
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
         $composerfile = $path.'/composer.json';
         $this->assertFileExists($composerfile);
         $composer = $this->helper->getJSON($composerfile);
         
         // check autoload psr-0
         $this->objectHasAttribute(
-            $vendor,
+            $this->meta['vendor'],
             $composer->autoload->{'psr-0'},
             'Autoload - PSR-0 key check: '
         );
 
         $this->assertEquals(
-            $composer->autoload->{'psr-0'}->$vendor,
+            $composer->autoload->{'psr-0'}->{$this->meta['vendor']},
             'src/',
             'Autoload - PSR-0 value check: '
         );
     }
 
-    public function testWithNsOption()
+    public function testProviderFileWithNsOption()
     {
-        $this->markTestIncomplete('to be implemented');
+        $namespace = $this->meta['namespace'].'\\\\'.$this->meta['vendor'];
+        $this->getCommand()->execute(
+            array(
+                'package' => $this->meta['package'],
+                '--ns' => $namespace
+            )
+        );
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
+        $providerfile = $path.'/src/'.
+            $this->meta['vendor'].'/'.$this->meta['name'].'/'.
+            $this->meta['vendor'].'/PackageServiceProvider.php';
+
+        // check file
+        $this->assertFileExists($providerfile);
+
+
+        // check namespace
+        $matches = array();
+        $this->assertTrue(
+            1 === preg_match(
+                '/namespace\s+([^\s;]+)/',
+                file_get_contents($providerfile),
+                $matches
+            )
+        );
+
+        $this->assertEquals(
+            preg_replace('/[\\\\]+/', '\\', $namespace),
+            $matches[1]
+        );
     }
 
-    public function testWithPsr0AndNsOption()
+    public function testComposerFileWithPsr0AndNsOption()
     {
-        $this->markTestIncomplete('to be implemented');
+        $namespace = $this->meta['namespace'].'\\\\'.$this->meta['vendor'];
+        $this->getCommand()->execute(
+            array(
+                'package' => $this->meta['package'],
+                '--psr0' => $this->meta['vendor'],
+                '--ns' => $namespace
+            )
+        );
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
+        $composerfile = $path.'/composer.json';
+        $this->assertFileExists($composerfile);
+        $composer = $this->helper->getJSON($composerfile);
+
+        // check autoload psr-0
+        $this->objectHasAttribute(
+            $this->meta['vendor'],
+            $composer->autoload->{'psr-0'},
+            'Autoload - PSR-0 key check: '
+        );
+
+        $this->assertEquals(
+            $composer->autoload->{'psr-0'}->{$this->meta['vendor']},
+            'src/',
+            'Autoload - PSR-0 value check: '
+        );
+    }
+
+    public function testProviderFileWithPsr0AndNsOption()
+    {
+        $namespace = $this->meta['namespace'].'\\\\'.$this->meta['vendor'];
+        $this->getCommand()->execute(
+            array(
+                'package' => $this->meta['package'],
+                '--psr0' => $this->meta['vendor'],
+                '--ns' => $namespace
+            )
+        );
+        $path = $this->app['path.base'].'/workbench/'.$this->meta['package'];
+        $providerfile = $path.'/src/'.
+            $this->meta['vendor'].'/'.$this->meta['name'].'/'.
+            $this->meta['vendor'].'/PackageServiceProvider.php';
+
+        // check file
+        $this->assertFileExists($providerfile);
+
+
+        // check namespace
+        $matches = array();
+        $this->assertTrue(
+            1 === preg_match(
+                '/namespace\s+([^\s;]+)/',
+                file_get_contents($providerfile),
+                $matches
+            )
+        );
+
+        $this->assertEquals(
+            preg_replace('/[\\\\]+/', '\\', $namespace),
+            $matches[1]
+        );
     }
 }
