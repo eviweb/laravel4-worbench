@@ -76,7 +76,11 @@ final class PackageCreator extends \Illuminate\Workbench\PackageCreator
             if (is_string($vars[$key])) {
                 $stub = str_replace('{{' . snake_case($key) . '}}', $value, $stub);
             } elseif (is_array($vars[$key])) {
-                $stub = str_replace('"{{' . snake_case($key) . '}}"', json_encode($value), $stub);
+                $stub = str_replace(
+                    '"{{' . snake_case($key) . '}}"', 
+                    preg_replace('#\\\/#', '/', json_encode($value)),
+                    $stub
+                );
             }
         }
 
