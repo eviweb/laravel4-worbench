@@ -73,8 +73,8 @@ class PackageTest extends \PHPUnit_Framework_TestCase
         $this->obj->psr0expected = addslashes('new\psr0\compliant\namespace');
         $this->obj->namespace = 'new\long///name\\space';
         $this->obj->namespaceexpected = 'new\long\name\space';
-        $this->obj->authors = $this->config->config()->get('workbench.composer.authors');
-        $this->obj->license = $this->config->config()->get('workbench.composer.license');
+        $this->obj->authors = $this->config->config()->get('workbench::composer.authors');
+        $this->obj->license = $this->config->config()->get('workbench::composer.license');
     }
 
     /**

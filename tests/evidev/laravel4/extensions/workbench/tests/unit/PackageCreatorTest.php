@@ -108,7 +108,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
      */
     private function createPackages()
     {
-        $config = $this->config->config()->get('workbench.composer');
+        $config = $this->config->config()->get('workbench::composer');
         $this->oldfashioned = Package::emptyInst()
             ->vendorProvider('Vendor')
             ->nameProvider('OldFashioned')
@@ -210,7 +210,7 @@ class PackageCreatorTest extends \PHPUnit_Framework_TestCase
     {
         $files = $this->getComposerFiles();
         $composer = $this->helper->getJSON($files['newpackage']);
-        $authors = $this->config->config()->get('workbench.composer.authors');
+        $authors = $this->config->config()->get('workbench::composer.authors');
         $this->assertCount(count($authors), $composer->authors);
         $this->assertEquals($authors[0]['name'], $composer->authors[0]->name);
         $this->assertEquals($authors[1]['email'], $composer->authors[1]->email);

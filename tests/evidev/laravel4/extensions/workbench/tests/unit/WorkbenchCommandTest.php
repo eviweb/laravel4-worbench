@@ -79,16 +79,14 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
         $this->helper = Helper::create();
         $this->app = array(
             'path.base' => vfsStream::setup('workbench')->url(),
-            'config' => array(
-                'workbench' => ConfigStub::create()->config()->get('workbench')
-            )
+            'config' => ConfigStub::create()->config()
         );
         $this->meta = array(
             'vendor' => 'Vendor',
             'name' => 'Package',
             'package' => 'vendor/package',
         );
-        $this->meta['namespace'] = $this->meta['vendor'].'\\\\'.$this->meta['name'];
+        $this->meta['namespace'] = $this->meta['vendor'].'\\\\'.$this->meta['name'];        
     }
 
     /**
@@ -125,11 +123,11 @@ class WorkbenchCommandTest extends \PHPUnit_Framework_TestCase
         $composer = $this->helper->getJSON($composerfile);
         $this->assertEquals($this->meta['package'], $composer->name);
         $this->assertCount(
-            count($this->app['config']['workbench']['composer']['authors']),
+            count($this->app['config']['workbench::config']['composer']['authors']),
             $composer->authors
         );
         $this->assertEquals(
-            $this->app['config']['workbench']['composer']['authors'][1]['homepage'],
+            $this->app['config']['workbench::config']['composer']['authors'][1]['homepage'],
             $composer->authors[1]->homepage
         );
         

@@ -69,8 +69,8 @@ final class WorkbenchCommand extends WorkbenchMakeCommand
         list($vendor, $name) = $this->getPackageSegments();
    
         // get current config
-        $config = $this->laravel['config']['workbench'];
-        $newconfig = isset($this->laravel['config']['workbench']['composer']);
+        $config = $this->laravel['config']->get('workbench::config');
+        $newconfig = isset($config['composer']);
 
         // get config options
         $authors = $newconfig ? $config['composer']['authors'] : array($config);

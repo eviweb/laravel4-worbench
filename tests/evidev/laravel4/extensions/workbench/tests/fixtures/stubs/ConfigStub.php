@@ -58,10 +58,12 @@ final class ConfigStub
      */
     private function __construct()
     {
+        $hint = realpath(__DIR__.'/../config');
         $this->config = new Repository(
-            new FileLoader(new Filesystem(), __DIR__.'/../config'),
+            new FileLoader(new Filesystem(), $hint),
             'test'
         );
+        $this->config->package('eviweb/laravel4-workbench', $hint, 'workbench');
     }
 
     /**
