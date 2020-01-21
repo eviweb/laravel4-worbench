@@ -12,15 +12,15 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=5.3.0 <7.0",
         "illuminate/support": "4.x",
         "illuminate/workbench": "4.x",
-        "eviweb/illuminate-support": "dev-master"
+        "eviweb/illuminate-support": "~0.1"
     },
     "require-dev": {
-        "mikey179/vfsStream": "dev-master",
+        "mikey179/vfsstream": "~1.6",
         "phpunit/phpunit": "3.7.*@dev",
-        "mockery/mockery": "dev-master@dev",
+        "mockery/mockery": "~0.9",
         "antecedent/patchwork": "*",
         "illuminate/config": "4.x",
         "illuminate/events": "4.x",
@@ -31,5 +31,10 @@
             "evidev": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    }
 }
